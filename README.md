@@ -1,4 +1,7 @@
 # json-path-mapper
+
+[![](https://jitpack.io/v/dmarciniak/json-path-mapper.svg)](https://jitpack.io/#dmarciniak/json-path-mapper)
+
 Json to Java class mapper based on json path syntax.
 * fast and easy to use
 * support & required java 8
@@ -144,4 +147,20 @@ JsonPathMapper<Customer4> mapper = JsonPathMapper.forClass(Customer4.class)
     .build();
 
 Customer cust = mapper.map(JSON);
+```
+
+## Installation:
+Get jar library from: https://github.com/dmarciniak/json-path-mapper/releases/latest
+
+or add dependency from jitpack repository (gradle example):
+```groovy
+repositories {
+    ///...
+    maven { url 'https://jitpack.io' }
+}
+//...
+dependencies {
+    //..
+    implementation 'com.github.dmarciniak:json-path-mapper:1.0.1'
+}
 ```
