@@ -12,7 +12,7 @@ For people who don't know lombok I also added example of creating instances of t
 
 ### Example 1:
 Data class:
-```
+```java
 @Data
 public class Customer {
     private String name;
@@ -22,7 +22,7 @@ public class Customer {
 }
 ```
 Creating instance of this data class:
-```
+```java
 Customer cust = new Customer();
 cust.setName(EXPECTED_NAME);
 cust.setSurname(EXPECTED_SURNAME);
@@ -30,7 +30,7 @@ cust.setAge(EXPECTED_AGE);
 cust.setCreated(EXPECTED_CREATED_DATE);
 ```
 Usage of json-path-mapper:
-```
+```java
 JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
    .initialize(Customer::new)
    .mapField("$.customer.name", Customer::setName)
@@ -44,7 +44,7 @@ Customer cust = mapper.map(JSON);
 
 ### Example 2:
 Data class:
-```
+```java
 @Value
 @With
 public class Customer2 {
@@ -59,7 +59,7 @@ public class Customer2 {
 }
 ```
 Creating instance of this data class:
-```
+```java
 Customer2 cust = Customer2.empty()
     .withName(EXPECTED_NAME)
     .withSurname(EXPECTED_SURNAME)
@@ -67,7 +67,7 @@ Customer2 cust = Customer2.empty()
     .withCreated(EXPECTED_CREATED_DATE);
 ```
 Usage of json-path-mapper:
-```
+```java
 JsonPathMapper<Customer2> mapper = JsonPathMapper.forClass(Customer2.class)
     .initialize(Customer2::empty)
     .mapField("$.customer.name", Customer2::withName)
@@ -81,7 +81,7 @@ Customer cust = mapper.map(JSON);
 
 ### Example 3:
 Data class:
-```
+```java
 @Builder
 @Getter
 @ToString
@@ -94,7 +94,7 @@ public class Customer3 {
 }
 ```
 Creating instance of this data class:
-```
+```java
 Customer3 cust = Customer3.builder()
     .name(EXPECTED_NAME)
     .surname(EXPECTED_SURNAME)
@@ -103,7 +103,7 @@ Customer3 cust = Customer3.builder()
     .build();
 ```
 Usage of json-path-mapper:
-```
+```java
 JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
     .initialize(Customer3::builder)
     .mapField("$.customer.name", Customer3.Customer3Builder::name)
@@ -117,7 +117,7 @@ Customer cust = mapper.map(JSON);
 
 ### Example 4:
 Data class:
-```
+```java
 @Getter
 @ToString
 @NoArgsConstructor
@@ -131,11 +131,11 @@ public class Customer4 {
 }
 ```
 Creating instance of this data class:
-```
+```java
 Customer4 cust = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE);
 ```
 Usage of json-path-mapper:
-```
+```java
 JsonPathMapper<Customer4> mapper = JsonPathMapper.forClass(Customer4.class)
     .mapField("$.customer.name", "name")
     .mapField("$.customer.surname", "surname")
