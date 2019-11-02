@@ -2,13 +2,13 @@
 Json to Java class mapper based on json path syntax.
 * fast and easy to use
 * support & required java 8
-* support all type of data classes: dto, value object, builders, etc
+* support all types of data classes: dto, value object, builders, etc
 
 For *json path* syntax examples see: https://bit.ly/2JVzFRJ
 
-##Examples of usages:
-I below examples I used lombok, but of course it isn't necessary.
-For people who don't know lombok I also added example of creating instances of that data classes.
+## Examples of usages:
+In below examples I used lombok, but of course it isn't necessary.
+For people who don't know lombok I also added example of creating instances of these data classes.
 
 ### Example 1:
 Data class:
