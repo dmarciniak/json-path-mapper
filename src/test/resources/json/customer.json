@@ -1,0 +1,11 @@
+{
+  "customer": {
+    "name": "Jan",
+    "surname": "Kowalski",
+    "age": 18,
+    "accountCreated": "1988-11-20"
+  },
+  "another": {
+    "unused": "field"
+  }
+}
