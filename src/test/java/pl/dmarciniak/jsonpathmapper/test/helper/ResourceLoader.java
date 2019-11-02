@@ -9,7 +9,7 @@ public class ResourceLoader {
 
     public static String load(String fullPath) {
         try {
-            return Files.readString(Paths.get(ResourceLoader.class.getClassLoader().getResource(fullPath).toURI()));
+            return new String(Files.readAllBytes(Paths.get(ResourceLoader.class.getClassLoader().getResource(fullPath).toURI())));
         } catch (IOException | URISyntaxException | NullPointerException e) {
             throw new IllegalArgumentException("Cannot load given resource: " + fullPath, e);
         }

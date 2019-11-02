@@ -52,7 +52,7 @@ public final class JsonPathMapperBuilder<T> {
 
     /**
      * Function to map single field
-     * @param func BiFunction that take and return instance of target class.
+     * Equivalent of: FieldMapper.fromPath(...).toChainField(...)
      * @return json mapper builder
      */
     public <S> JsonPathMapperBuilder<T> mapField(String jsonPath, BiFunction<T, S, T> func) {
@@ -61,8 +61,18 @@ public final class JsonPathMapperBuilder<T> {
     }
 
     /**
+     * Function to optionally map single field
+     * Equivalent of: FieldMapper.fromPath(...).optional().toChainField(...)
+     * @return json mapper builder
+     */
+    public <S> JsonPathMapperBuilder<T> mapOptionalField(String jsonPath, BiFunction<T, S, T> func) {
+        fieldMappers.add(FieldMapper.fromPath(jsonPath).optional().toChainField(func));
+        return this;
+    }
+
+    /**
      * Function to map single field
-     * @param consumer BiConsumer that take instance of target class and return nothing
+     * Equivalent of: FieldMapper.fromPath(...).toGetterField(...)
      * @return json mapper builder
      */
     public <S> JsonPathMapperBuilder<T> mapField(String jsonPath, BiConsumer<T, S> consumer) {
@@ -71,12 +81,32 @@ public final class JsonPathMapperBuilder<T> {
     }
 
     /**
+     * Function to optionally map single field
+     * Equivalent of: FieldMapper.fromPath(...).optional().toGetterField(...)
+     * @return json mapper builder
+     */
+    public <S> JsonPathMapperBuilder<T> mapOptionalField(String jsonPath, BiConsumer<T, S> consumer) {
+        fieldMappers.add(FieldMapper.fromPath(jsonPath).optional().toGetterField(consumer));
+        return this;
+    }
+
+    /**
      * Function to map single field
-     * @param targetFieldName Name of private field in target class
+     * Equivalent of: FieldMapper.fromPath(...).toPrivateField(...)
      * @return json mapper builder
      */
     public <S> JsonPathMapperBuilder<T> mapField(String jsonPath, String targetFieldName) {
         fieldMappers.add(FieldMapper.fromPath(jsonPath).toPrivateField(targetFieldName));
+        return this;
+    }
+
+    /**
+     * Function to optionally map single field
+     * Equivalent of: FieldMapper.fromPath(...).optional().toPrivateField(...)
+     * @return json mapper builder
+     */
+    public <S> JsonPathMapperBuilder<T> mapOptionalField(String jsonPath, String targetFieldName) {
+        fieldMappers.add(FieldMapper.fromPath(jsonPath).optional().toPrivateField(targetFieldName));
         return this;
     }
 

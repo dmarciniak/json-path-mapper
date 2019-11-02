@@ -138,4 +138,17 @@ public class JsonPathMapperTest {
 
         Assertions.assertThrows(JsonFieldCastException.class, () -> mapper.map(JSON));
     }
+
+    @Test
+    void customerTestWithOptionalFields() {
+        JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
+                .initialize(Customer::new)
+                .mapOptionalField(CUSTOMER_NAME_PATH, Customer::setName)
+                .mapOptionalField("$.customer.noexistfield", Customer::setSurname)
+                .build();
+
+        Customer cust = mapper.map(JSON);
+        Assertions.assertEquals(EXPECTED_NAME, cust.getName());
+        Assertions.assertNull(cust.getSurname());
+    }
 }

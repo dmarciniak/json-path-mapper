@@ -28,6 +28,7 @@ public final class FieldMapper<T, S, U> {
     private final BiFunction<T, U, T> func;
     private final Predicate<S> validator;
     private final Function<S, U> mapper;
+    private final boolean optional;
 
     /**
      * Json path for mapping field
@@ -49,7 +50,7 @@ public final class FieldMapper<T, S, U> {
      * @return json mapper builder
      */
     public static <W, V> FieldMapper<W, V, V> fromPath(String jsonPath) {
-        return new FieldMapper<>(jsonPath, (obj, val) -> obj, val -> true, val -> val);
+        return new FieldMapper<>(jsonPath, (obj, val) -> obj, val -> true, val -> val, false);
     }
 
     /**
@@ -60,7 +61,7 @@ public final class FieldMapper<T, S, U> {
      * @return json mapper builder
      */
     public <W, V> FieldMapper<W, S, V> toChainField(BiFunction<W, V, W> func) {
-        return new FieldMapper<>(this.jsonPath, func, this.validator, val -> (V) val);
+        return new FieldMapper<>(this.jsonPath, func, this.validator, val -> (V) val, this.optional);
     }
 
     /**
@@ -71,7 +72,7 @@ public final class FieldMapper<T, S, U> {
      * @return json mapper builder
      */
     public <W, V> FieldMapper<W, S, V> toGetterField(BiConsumer<W, V> consumer) {
-        return new FieldMapper<>(this.jsonPath, (targetObj, val) -> {consumer.accept(targetObj, val); return targetObj;}, this.validator, val -> (V) val);
+        return new FieldMapper<>(this.jsonPath, (targetObj, val) -> {consumer.accept(targetObj, val); return targetObj;}, this.validator, val -> (V) val, this.optional);
     }
 
     /**
@@ -105,7 +106,7 @@ public final class FieldMapper<T, S, U> {
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     throw new JsonPathException("Cannot set value to field: " + fieldName, e);
                 }
-            }, this.validator, val -> (V) val);
+            }, this.validator, val -> (V) val, this.optional);
     }
 
     /**
@@ -114,7 +115,7 @@ public final class FieldMapper<T, S, U> {
      * @return json mapper builder
      */
     public FieldMapper<T, S, U> withValidator(Predicate<S> validator) {
-        return new FieldMapper<>(this.jsonPath, this.func, validator, this.mapper);
+        return new FieldMapper<>(this.jsonPath, this.func, validator, this.mapper, this.optional);
     }
 
     /**
@@ -123,26 +124,38 @@ public final class FieldMapper<T, S, U> {
      * @return json mapper builder
      */
     public FieldMapper<T, S, U> withMapper(Function<S, U> mapper) {
-        return new FieldMapper<>(this.jsonPath, this.func, this.validator, mapper);
+        return new FieldMapper<>(this.jsonPath, this.func, this.validator, mapper, this.optional);
+    }
+
+    /**
+     * If set then json field is optional
+     * @return json mapper builder
+     */
+    public FieldMapper<T, S, U> optional() {
+        return new FieldMapper<>(this.jsonPath, this.func, this.validator, this.mapper, true);
     }
 
     T run(DocumentContext json, T targetObj) {
-        S rawValue = readField(json);
-        validateField(rawValue);
-        return mapField(targetObj, rawValue);
-    }
-
-    private S readField(DocumentContext json) {
         try {
-            return json.read(jsonPath);
+            S rawValue = json.read(jsonPath);
+            validateField(rawValue);
+            return mapField(targetObj, rawValue);
         } catch (PathNotFoundException e) {
-            throw new JsonFieldNotFoundException("Wrong field paht: " + jsonPath, e);
+            if(optional) {
+                return targetObj;
+            } else {
+                throw new JsonFieldNotFoundException("Wrong field path: " + jsonPath, e);
+            }
         }
     }
 
     private void validateField(S rawValue) {
-        if(!validator.test(rawValue)) {
-            throw new JsonFieldValidatorException("Validator exception for path: " + jsonPath);
+        try {
+            if(!validator.test(rawValue)) {
+                throw new JsonFieldValidatorException("Validator exception for path: " + jsonPath);
+            }
+        } catch (ClassCastException e) {
+            throw new JsonFieldCastException("Wrong type of json field", e);
         }
     }
 
