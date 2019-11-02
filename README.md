@@ -149,6 +149,19 @@ JsonPathMapper<Customer4> mapper = JsonPathMapper.forClass(Customer4.class)
 Customer cust = mapper.map(JSON);
 ```
 
+### Example of getting optional fields:
+```java
+JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
+    .initialize(Customer::new)
+    .mapOptionalField("$.customer.name", Customer::setName)
+    .mapOptionalField("$.customer.noexistfield", Customer::setSurname)
+    .build();
+
+Customer cust = mapper.map(JSON);
+Assertions.assertEquals(EXPECTED_NAME, cust.getName());
+Assertions.assertNull(cust.getSurname());
+```
+
 ## Installation:
 Get jar library from: https://github.com/dmarciniak/json-path-mapper/releases/latest
 
@@ -161,6 +174,6 @@ repositories {
 //...
 dependencies {
     //..
-    implementation 'com.github.dmarciniak:json-path-mapper:1.0.1'
+    implementation 'com.github.dmarciniak:json-path-mapper:1.0.3'
 }
 ```
