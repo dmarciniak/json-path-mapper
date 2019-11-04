@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import pl.dmarciniak.jsonpathmapper.exception.JsonParseException;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Class for mapping (string) json to target (T) class.
@@ -36,12 +38,24 @@ public class JsonPathMapper<T> {
      * @return instance of target class with mapped data
      */
     public T map(String jsonStr) {
+        return mapStream(jsonStr, fieldMappers.stream());
+    }
+
+    /**
+     * Method parallel map json to target class
+     * @param jsonStr String with source json
+     * @return instance of target class with mapped data
+     */
+    public T parallelMap(String jsonStr) {
+        return mapStream(jsonStr, fieldMappers.parallelStream());
+    }
+
+    private T mapStream(String jsonStr, Stream<FieldMapper<T, ?, ?>> stream) {
         DocumentContext json = parseJson(jsonStr);
         T targetObj = initializer.get();
-        for(FieldMapper<T, ?, ?> fieldMapper : fieldMappers) {
-            targetObj = fieldMapper.run(json, targetObj);
-        }
-        return targetObj;
+        return stream.map(mapper -> mapper.getMapFunc(json))
+                .reduce(Function.identity(), Function::andThen)
+                .apply(targetObj);
     }
 
     private DocumentContext parseJson(String jsonStr) {

@@ -86,6 +86,26 @@ public class JsonPathMapperTest {
     }
 
     @Test
+    void customer3ParallelTest() {
+        Customer3 expected = Customer3.builder()
+                .name(EXPECTED_NAME)
+                .surname(EXPECTED_SURNAME)
+                .age(EXPECTED_AGE)
+                .created(EXPECTED_CREATED_DATE)
+                .build();
+
+        JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
+                .initialize(Customer3::builder)
+                .mapField(CUSTOMER_NAME_PATH, Customer3.Customer3Builder::name)
+                .mapField(CUSTOMER_SURNAME_PATH, Customer3.Customer3Builder::surname)
+                .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
+                .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
+                .buildWithResultMapper(Customer3.Customer3Builder::build);
+
+        Assertions.assertEquals(expected, mapper.parallelMap(JSON));
+    }
+
+    @Test
     void customer4Test() {
         Customer4 expected = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE);
 

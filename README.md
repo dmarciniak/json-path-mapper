@@ -6,6 +6,8 @@ Json to Java class mapper based on json path syntax.
 * fast and easy to use
 * support & required java 8
 * support all types of data classes: dto, value object, builders, etc
+* support for optional fields
+* support for parallel map fields
 
 For *json path* syntax examples see: https://bit.ly/2JVzFRJ
 
@@ -160,6 +162,19 @@ JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
 Customer cust = mapper.map(JSON);
 Assertions.assertEquals(EXPECTED_NAME, cust.getName());
 Assertions.assertNull(cust.getSurname());
+```
+
+### Example of parallel map fields:
+```java
+JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
+    .initialize(Customer3::builder)
+    .mapField("$.customer.name", Customer3.Customer3Builder::name)
+    .mapField("$.customer.surname", Customer3.Customer3Builder::surname)
+    .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
+    .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
+    .buildWithResultMapper(Customer3.Customer3Builder::build);
+
+Customer cust = mapper.parallelMap(JSON);
 ```
 
 ## Installation:

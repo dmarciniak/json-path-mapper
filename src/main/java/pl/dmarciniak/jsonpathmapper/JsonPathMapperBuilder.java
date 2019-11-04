@@ -132,6 +132,11 @@ public final class JsonPathMapperBuilder<T> {
             public S map(String jsonStr) {
                 return resultMapper.apply(mapper.map(jsonStr));
             }
+
+            @Override
+            public S parallelMap(String jsonStr) {
+                return resultMapper.apply(mapper.parallelMap(jsonStr));
+            }
         };
     }
 }

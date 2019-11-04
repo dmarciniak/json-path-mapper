@@ -10,10 +10,7 @@ import pl.dmarciniak.jsonpathmapper.exception.JsonFieldNotFoundException;
 import pl.dmarciniak.jsonpathmapper.exception.JsonFieldValidatorException;
 
 import java.lang.reflect.Field;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Class for defining mapping rule for single field
@@ -135,36 +132,32 @@ public final class FieldMapper<T, S, U> {
         return new FieldMapper<>(this.jsonPath, this.func, this.validator, this.mapper, true);
     }
 
-    T run(DocumentContext json, T targetObj) {
+    Function<T, T> getMapFunc(DocumentContext json) {
         try {
             S rawValue = json.read(jsonPath);
             validateField(rawValue);
-            return mapField(targetObj, rawValue);
+            U mappedValue = mapper.apply(rawValue);
+            return (targetObj) -> {
+                try {
+                    return func.apply(targetObj, mappedValue);
+                } catch (ClassCastException e) {
+                    throw new JsonFieldCastException("Wrong type of json field", e);
+                }
+            };
         } catch (PathNotFoundException e) {
             if(optional) {
-                return targetObj;
+                return Function.identity();
             } else {
                 throw new JsonFieldNotFoundException("Wrong field path: " + jsonPath, e);
             }
+        } catch (ClassCastException e) {
+            throw new JsonFieldCastException("Wrong type of json field", e);
         }
     }
 
     private void validateField(S rawValue) {
-        try {
-            if(!validator.test(rawValue)) {
-                throw new JsonFieldValidatorException("Validator exception for path: " + jsonPath);
-            }
-        } catch (ClassCastException e) {
-            throw new JsonFieldCastException("Wrong type of json field", e);
-        }
-    }
-
-    private T mapField(T targetObj, S rawValue) {
-        try {
-            U mappedValue = mapper.apply(rawValue);
-            return func.apply(targetObj, mappedValue);
-        } catch (ClassCastException e) {
-            throw new JsonFieldCastException("Wrong type of json field", e);
+        if(!validator.test(rawValue)) {
+            throw new JsonFieldValidatorException("Validator exception for path: " + jsonPath);
         }
     }
 }
