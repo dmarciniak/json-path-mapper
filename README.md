@@ -189,6 +189,6 @@ repositories {
 //...
 dependencies {
     //..
-    implementation 'com.github.dmarciniak:json-path-mapper:1.0.3'
+    implementation 'com.github.dmarciniak:json-path-mapper:1.0.4'
 }
 ```
