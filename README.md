@@ -165,6 +165,10 @@ Assertions.assertNull(cust.getSurname());
 ```
 
 ### Example of parallel map fields:
+It's recommended to use parallel map when it's time-expensive field mapper or validation algorithm.
+
+See benchmark tests: http://trust-me-i-am-an.engineer/blog/uncategorized/example-of-java-benchmark-tests-using-jmh/
+
 ```java
 JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
     .initialize(Customer3::builder)
