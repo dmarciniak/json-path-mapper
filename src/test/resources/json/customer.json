@@ -3,7 +3,17 @@
     "name": "Jan",
     "surname": "Kowalski",
     "age": 18,
-    "accountCreated": "1988-11-20"
+    "accountCreated": "1988-11-20",
+    "phones": [
+      {
+        "number": "111-222-333",
+        "description": "home"
+      },
+      {
+        "number": "333-222-444",
+        "description": "work"
+      }
+    ]
   },
   "another": {
     "unused": "field"

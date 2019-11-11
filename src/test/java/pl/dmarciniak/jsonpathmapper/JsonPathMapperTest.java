@@ -13,6 +13,7 @@ import pl.dmarciniak.jsonpathmapper.test.data.Customer4;
 import pl.dmarciniak.jsonpathmapper.test.helper.ResourceLoader;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 
 public class JsonPathMapperTest {
     private final static String JSON = ResourceLoader.load("json/customer.json");
@@ -21,11 +22,15 @@ public class JsonPathMapperTest {
     private final static String CUSTOMER_SURNAME_PATH = "$.customer.surname";
     private final static String CUSTOMER_AGE_PATH = "$.customer.age";
     private final static String CUSTOMER_CREATED_PATH = "$.customer.accountCreated";
+    private final static String CUSTOMER_PHONES_PATH = "$.customer.phones[*].number";
 
     private final static String EXPECTED_NAME = "Jan";
     private final static String EXPECTED_SURNAME = "Kowalski";
     private final static int EXPECTED_AGE = 18;
     private final static LocalDate EXPECTED_CREATED_DATE = LocalDate.of(1988, 11, 20);
+    private final static String EXPECTED_PHONE_1 = "111-222-333";
+    private final static String EXPECTED_PHONE_2 = "333-222-444";
+
 
     @Test
     void customerTest() {
@@ -34,6 +39,7 @@ public class JsonPathMapperTest {
         expected.setSurname(EXPECTED_SURNAME);
         expected.setAge(EXPECTED_AGE);
         expected.setCreated(EXPECTED_CREATED_DATE);
+        expected.setPhones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 
         JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
                 .initialize(Customer::new)
@@ -41,6 +47,7 @@ public class JsonPathMapperTest {
                 .mapField(CUSTOMER_SURNAME_PATH, Customer::setSurname)
                 .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toGetterField(Customer::setAge).withValidator(val -> val > 0))
                 .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toGetterField(Customer::setCreated).withMapper(LocalDate::parse))
+                .mapField(CUSTOMER_PHONES_PATH, Customer::setPhones)
                 .build();
 
         Assertions.assertEquals(expected, mapper.map(JSON));
@@ -52,7 +59,8 @@ public class JsonPathMapperTest {
                 .withName(EXPECTED_NAME)
                 .withSurname(EXPECTED_SURNAME)
                 .withAge(EXPECTED_AGE)
-                .withCreated(EXPECTED_CREATED_DATE);
+                .withCreated(EXPECTED_CREATED_DATE)
+                .withPhones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 
         JsonPathMapper<Customer2> mapper = JsonPathMapper.forClass(Customer2.class)
                 .initialize(Customer2::empty)
@@ -60,6 +68,7 @@ public class JsonPathMapperTest {
                 .mapField(CUSTOMER_SURNAME_PATH, Customer2::withSurname)
                 .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toChainField(Customer2::withAge).withValidator(val -> val > 0))
                 .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toChainField(Customer2::withCreated).withMapper(LocalDate::parse))
+                .mapField(CUSTOMER_PHONES_PATH, Customer2::withPhones)
                 .build();
 
         Assertions.assertEquals(expected, mapper.map(JSON));
@@ -72,6 +81,7 @@ public class JsonPathMapperTest {
                 .surname(EXPECTED_SURNAME)
                 .age(EXPECTED_AGE)
                 .created(EXPECTED_CREATED_DATE)
+                .phones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2))
                 .build();
 
         JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
@@ -80,6 +90,7 @@ public class JsonPathMapperTest {
                 .mapField(CUSTOMER_SURNAME_PATH, Customer3.Customer3Builder::surname)
                 .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
                 .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
+                .mapField(CUSTOMER_PHONES_PATH, Customer3.Customer3Builder::phones)
                 .buildWithResultMapper(Customer3.Customer3Builder::build);
 
         Assertions.assertEquals(expected, mapper.map(JSON));
@@ -92,6 +103,7 @@ public class JsonPathMapperTest {
                 .surname(EXPECTED_SURNAME)
                 .age(EXPECTED_AGE)
                 .created(EXPECTED_CREATED_DATE)
+                .phones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2))
                 .build();
 
         JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
@@ -100,6 +112,7 @@ public class JsonPathMapperTest {
                 .mapField(CUSTOMER_SURNAME_PATH, Customer3.Customer3Builder::surname)
                 .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
                 .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
+                .mapField(CUSTOMER_PHONES_PATH, Customer3.Customer3Builder::phones)
                 .buildWithResultMapper(Customer3.Customer3Builder::build);
 
         Assertions.assertEquals(expected, mapper.parallelMap(JSON));
@@ -107,13 +120,14 @@ public class JsonPathMapperTest {
 
     @Test
     void customer4Test() {
-        Customer4 expected = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE);
+        Customer4 expected = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE, Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 
         JsonPathMapper<Customer4> mapper = JsonPathMapper.forClass(Customer4.class)
                 .mapField(CUSTOMER_NAME_PATH, "name")
                 .mapField(CUSTOMER_SURNAME_PATH, "surname")
                 .mapField(FieldMapper.fromPath(CUSTOMER_AGE_PATH, Integer.class).toPrivateField("age", Customer4.class).withValidator(val -> val > 0))
                 .mapField(FieldMapper.fromPath(CUSTOMER_CREATED_PATH, String.class).toPrivateField("created", Customer4.class).withMapper(LocalDate::parse))
+                .mapField(CUSTOMER_PHONES_PATH, "phones")
                 .build();
 
         Assertions.assertEquals(expected, mapper.map(JSON));

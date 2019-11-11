@@ -24,6 +24,7 @@ public class Customer {
     private String surname;
     private int age;
     private LocalDate created;
+    private List<String> phones;
 }
 ```
 Creating instance of this data class:
@@ -33,6 +34,7 @@ cust.setName(EXPECTED_NAME);
 cust.setSurname(EXPECTED_SURNAME);
 cust.setAge(EXPECTED_AGE);
 cust.setCreated(EXPECTED_CREATED_DATE);
+cust.setPhones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 ```
 Usage of json-path-mapper:
 ```java
@@ -42,6 +44,7 @@ JsonPathMapper<Customer> mapper = JsonPathMapper.forClass(Customer.class)
    .mapField("$.customer.surname", Customer::setSurname)
    .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toGetterField(Customer::setAge).withValidator(val -> val > 0))
    .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toGetterField(Customer::setCreated).withMapper(LocalDate::parse))
+   .mapField("$.customer.phones[*].number", Customer::setPhones)
    .build();
 
 Customer cust = mapper.map(JSON);
@@ -54,13 +57,14 @@ Data class:
 @With
 public class Customer2 {
     public static Customer2 empty() {
-        return new Customer2(null, null, 0, null);
+        return new Customer2(null, null, 0, null, Collections.emptyList());
     }
 
     private String name;
     private String surname;
     private int age;
     private LocalDate created;
+    private List<String> phones;
 }
 ```
 Creating instance of this data class:
@@ -69,7 +73,8 @@ Customer2 cust = Customer2.empty()
     .withName(EXPECTED_NAME)
     .withSurname(EXPECTED_SURNAME)
     .withAge(EXPECTED_AGE)
-    .withCreated(EXPECTED_CREATED_DATE);
+    .withCreated(EXPECTED_CREATED_DATE)
+    .withPhones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 ```
 Usage of json-path-mapper:
 ```java
@@ -79,6 +84,7 @@ JsonPathMapper<Customer2> mapper = JsonPathMapper.forClass(Customer2.class)
     .mapField("$.customer.surname", Customer2::withSurname)
     .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toChainField(Customer2::withAge).withValidator(val -> val > 0))
     .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toChainField(Customer2::withCreated).withMapper(LocalDate::parse))
+    .mapField("$.customer.phones[*].number", Customer2::withPhones)
     .build();
 
 Customer cust = mapper.map(JSON);
@@ -96,6 +102,7 @@ public class Customer3 {
     private String surname;
     private int age;
     private LocalDate created;
+    private List<String> phones;
 }
 ```
 Creating instance of this data class:
@@ -105,6 +112,7 @@ Customer3 cust = Customer3.builder()
     .surname(EXPECTED_SURNAME)
     .age(EXPECTED_AGE)
     .created(EXPECTED_CREATED_DATE)
+    .phones(Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2))
     .build();
 ```
 Usage of json-path-mapper:
@@ -115,6 +123,7 @@ JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Bu
     .mapField("$.customer.surname", Customer3.Customer3Builder::surname)
     .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
     .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
+    .mapField("$.customer.phones[*].number", Customer3.Customer3Builder::phones)
     .buildWithResultMapper(Customer3.Customer3Builder::build);
 
 Customer cust = mapper.map(JSON);
@@ -133,11 +142,12 @@ public class Customer4 {
     private String surname;
     private int age;
     private LocalDate created;
+    private List<String> phones;
 }
 ```
 Creating instance of this data class:
 ```java
-Customer4 cust = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE);
+Customer4 cust = new Customer4(EXPECTED_NAME, EXPECTED_SURNAME, EXPECTED_AGE, EXPECTED_CREATED_DATE, Arrays.asList(EXPECTED_PHONE_1, EXPECTED_PHONE_2));
 ```
 Usage of json-path-mapper:
 ```java
@@ -146,6 +156,7 @@ JsonPathMapper<Customer4> mapper = JsonPathMapper.forClass(Customer4.class)
     .mapField("$.customer.surname", "surname")
     .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toPrivateField("age", Customer4.class).withValidator(val -> val > 0))
     .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toPrivateField("created", Customer4.class).withMapper(LocalDate::parse))
+    .mapField("$.customer.phones[*].number", "phones")
     .build();
 
 Customer cust = mapper.map(JSON);
@@ -166,14 +177,7 @@ Assertions.assertNull(cust.getSurname());
 
 ### Example of parallel map fields:
 ```java
-JsonPathMapper<Customer3> mapper = JsonPathMapper.forClass(Customer3.Customer3Builder.class)
-    .initialize(Customer3::builder)
-    .mapField("$.customer.name", Customer3.Customer3Builder::name)
-    .mapField("$.customer.surname", Customer3.Customer3Builder::surname)
-    .mapField(FieldMapper.fromPath("$.customer.age", Integer.class).toChainField(Customer3.Customer3Builder::age).withValidator(val -> val > 0))
-    .mapField(FieldMapper.fromPath("$.customer.accountCreated", String.class).toChainField(Customer3.Customer3Builder::created).withMapper(LocalDate::parse))
-    .buildWithResultMapper(Customer3.Customer3Builder::build);
-
+//...
 Customer cust = mapper.parallelMap(JSON);
 ```
 
